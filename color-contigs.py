@@ -3,6 +3,7 @@
 import argparse
 from glob import glob
 import os.path
+import sys
 
 colors = ["2F6D80", # Magenta
           "733E98", # Purple
@@ -28,19 +29,21 @@ def main():
     out = ['name,color,bin\n']
     for bin_fasta in bin_fastas:
         hexcolor = colors[n]
-        bin_label = bin_fasta.split(args.name)[1].split('.fa')[0]
+        bin_label = os.path.basename(bin_fasta).split(args.name + '.')[1].split('.fa')[0]
         with open(bin_fasta) as handle:
             for line in handle.readlines():
                 if line[0] == '>':
+                    print(line, flush=True)
                     seq_id = line.split(delim)[1].rstrip()
                     out.append(seq_id + ',' + hexcolor + ',' + bin_label + '\n')
+        n += 1
     with open(args.out, 'w') as handle:
         for line in out:
             handle.write(line)
 
     return
 
-def parse_args():
+def get_args():
 
     parser = argparse.ArgumentParser(
         description=(
