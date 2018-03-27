@@ -16,7 +16,7 @@ module unload python
 
 # Assemble reads
 megahit --12 "$READS_OUT" -o "$DIR"/megahit_out --presets meta-sensitive -t "$THREADS"
-megahit_toolkit contig2fastg 121 "$DIR"/megahit_out/intermediate_contigs/k121.contigs.fa > "$DIR"/megahit_out/k121.fastg
+megahit_toolkit contig2fastg 141 "$DIR"/megahit_out/intermediate_contigs/k141.contigs.fa > "$DIR"/megahit_out/k141.fastg
 
 # Map reads
 module load java/1.8
@@ -27,8 +27,12 @@ module unload java/1.8
 
 # Bin contigs
 module load python/2.7-2015q2
-jgi_summarize_bam_contig_depths --outputDepth "$DIR"/"$NAME"_depth.txt "$DIR"/"$NAME".sorted.bam
+jgi_summarize_bam_contig_depths --outputDepth "$DIR"/"$NAME"_depth.txt "$DIR"/"$NAME"_sorted.bam
 metabat2 -i "$DIR"/megahit_out/final.contigs.fa -a "$DIR"/"$NAME"_depth.txt -o "$DIR"/reassembled_bins/reassembled_bins -m 2500 -t "$THREADS"
 
 checkm lineage_wf -x fa -t "$THREADS" "$DIR"/reassembled_bins "$DIR"/reassembled_bins/checkm > "$DIR"/reassembled_bins/checkm_out.txt
+module unload python
+
+module load python/3.5-2017q2
+color-contigs.py -d "$DIR"/reassembled_bins -n reassembled_bins -e k141_ -o "$DIR"/reassembled_bins/bin_colors.csv
 module unload python

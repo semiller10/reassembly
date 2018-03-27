@@ -24,18 +24,27 @@ def main():
     args = get_args()
     bin_fastas = glob(os.path.join(args.dir, args.name + '.*.fa'))
     delim = args.delim
+    write_bin_ids = args.ids
 
     n = 0
     out = ['name,color,bin\n']
     for bin_fasta in bin_fastas:
+        if write_bin_ids:
+            bin_list = []
         hexcolor = colors[n]
         bin_label = os.path.basename(bin_fasta).split(args.name + '.')[1].split('.fa')[0]
         with open(bin_fasta) as handle:
             for line in handle.readlines():
                 if line[0] == '>':
-                    print(line, flush=True)
                     seq_id = line.split(delim)[1].rstrip()
                     out.append(seq_id + ',' + hexcolor + ',' + bin_label + '\n')
+                    if write_bin_ids:
+                        bin_list.append(seq_id + ',')
+        if write_bin_ids:
+            with open(os.path.join(args.dir, args.name + '.' + bin_label + '.ids.txt'), 'w') as handle:
+                for seq_id in bin_list:
+                    handle.write(seq_id)
+
         n += 1
     with open(args.out, 'w') as handle:
         for line in out:
@@ -60,6 +69,9 @@ def get_args():
         '-e', '--delim', help='Contig delimiter in the assembly file, e.g., "k141_"'
     )
     parser.add_argument('-o', '--out', help='Output file')
+    parser.add_argument(
+        '-i', '--ids', action='store_true', help='Write lists of seq ids in each bin'
+    )
 
     args = parser.parse_args()
 
